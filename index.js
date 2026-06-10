@@ -3,13 +3,15 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
 const Groq = require('groq-sdk');
+const jwt = require('jsonwebtoken')
+
 
 // Model import kiya
 const Script = require('./models/Script');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-
+const JWT_SECRET = process.env.JWT_SECRET ;
 // Initialize Groq
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
@@ -21,13 +23,36 @@ mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('MongoDB Connected Successfully!'))
     .catch((err) => console.error('MongoDB Connection Error:', err));
 
+
+// authentication route
+
+app.use('/api/auth' , require('./routes/auth'));
+
+//middleware
+const fetchUser = (req, res, next) => {
+    
+    const authHeader = req.header('Authorization');
+    if (!authHeader) {
+        return res.status(401).json({ success: false, error: "Access Denied. Bhai, login kar pehle!" });
+    }
+
+    try {
+        const token = authHeader.replace("Bearer ", "");
+        const decodedData = jwt.verify(token, JWT_SECRET);
+        req.user = decodedData; 
+        next(); 
+    } catch (error) {
+        res.status(401).json({ success: false, error: "Invalid or Expired Token." });
+    }
+};
+
 // Basic Route
 app.get('/', (req, res) => {
     res.send('AutoScript AI Backend is running super fast with Groq & MongoDB!');
 });
 
 // AI Generation Route
-app.post('/api/generate', async (req, res) => {
+app.post('/api/generate',fetchUser, async (req, res) => {
     try {
         const { topic } = req.body;
 
@@ -44,8 +69,9 @@ app.post('/api/generate', async (req, res) => {
 
         const generatedText = chatCompletion.choices[0]?.message?.content || "No script generated.";
 
-        // Database me save karna
+        // Database maii save
         const newScript = new Script({
+            userId:req.user.userId,
             topic: topic,
             generatedScript: generatedText
         });
@@ -66,9 +92,11 @@ app.post('/api/generate', async (req, res) => {
 });
 
 // Fetch All Generated Scripts History
-app.get('/api/history', async (req, res) => {
+app.get('/api/history',fetchUser, async (req, res) => {
     try {
-        const history = await Script.find().sort({ createdAt: -1 }); // Latest first
+
+
+        const history = await Script.find({userId:req.user.userId}).sort({ createdAt: -1 }); // Latest first
         res.status(200).json({
             success: true,
             history: history
