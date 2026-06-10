@@ -15,7 +15,12 @@ const JWT_SECRET = process.env.JWT_SECRET ;
 // Initialize Groq
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-app.use(cors());
+app.use(cors({
+    origin: "*", // Abhi ke liye sab allow kar de, baad me vercel ka link daal dena
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+}));
+app.use(express.json());
 app.use(express.json());
 
 // MongoDB Connection
