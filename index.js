@@ -31,7 +31,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 // authentication route
 
-app.use('/api/auth' , require('./routes/auth'));
+app.use("/api/auth" , require("./routes/auth"));
 
 //middleware
 const fetchUser = (req, res, next) => {
