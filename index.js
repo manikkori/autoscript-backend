@@ -16,7 +16,7 @@ const JWT_SECRET = process.env.JWT_SECRET ;
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 app.use(cors({
-    origin: "*", // Abhi ke liye sab allow kar de, baad me vercel ka link daal dena
+    origin: "*", 
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }));
