@@ -1,9 +1,9 @@
-///const express = require('express');
-///const cors = require('cors');
-//const mongoose = require('mongoose');
-//require('dotenv').config();
-//const Groq = require('groq-sdk');
-//const jwt = require('jsonwebtoken')
+const express = require('express');
+const cors = require('cors');
+const mongoose = require('mongoose');
+require('dotenv').config();
+const Groq = require('groq-sdk');
+const jwt = require('jsonwebtoken')
 
 
 // Model import kiya
